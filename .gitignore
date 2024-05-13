@@ -1,1 +1,5 @@
 /securebin
+.vscode
+data.db
+/bin/securebin*
+.DS_Store

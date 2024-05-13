@@ -17,6 +17,9 @@ var serveCmd = &cobra.Command{
 	},
 }
 
+var addr string
+
 func init() {
 	rootCmd.AddCommand(serveCmd)
+	serveCmd.Flags().StringVarP(&addr, "listening addr", "l", ":8080", "listening addr")
 }

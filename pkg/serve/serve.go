@@ -1,8 +1,12 @@
 package serve
 
 import (
-	"net/http"
+	"fmt"
+	"mime"
+	"strings"
 	"time"
+
+	"securebin/ui"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -21,11 +25,15 @@ type GetMessageRequest struct {
 	Password string
 }
 
+type CreateMessageResponse struct {
+	ID uint `json:"id"`
+}
+
 type GetMessageResponse struct {
 	ExpireAt       time.Time `json:"expire_at"`
 	Content        string    `json:"content"`
 	AccessCount    int64     `json:"acccess_count"`
-	MaxAccessCount int64     `json:"max_access_coujnt"`
+	MaxAccessCount int64     `json:"max_access_count"`
 }
 
 type Message struct {
@@ -47,6 +55,10 @@ func CheckPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
+func BuildUIAssetPath(path string) string {
+	return fmt.Sprintf("dist%s", path)
+}
+
 func Invoke() error {
 	db, err := gorm.Open(sqlite.Open("data.db"), &gorm.Config{})
 	if err != nil {
@@ -56,10 +68,45 @@ func Invoke() error {
 	db.AutoMigrate(&Message{})
 
 	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
+
+	staticFS := ui.StaticFS
+
+	r.Use(func(ctx *gin.Context) {
+		requestPath := ctx.Request.URL.Path
+
+		if strings.HasPrefix(requestPath, "/api/") {
+			ctx.Next()
+			return
+		}
+		if ctx.Request.Method == "GET" {
+			extentions := []string{".css", ".js", ".ico", ".png", ".jpg", ".svg"}
+			for _, extension := range extentions {
+				if strings.HasSuffix(requestPath, extension) {
+					data, err := staticFS.ReadFile(BuildUIAssetPath(requestPath))
+					if err != nil {
+						_ = ctx.AbortWithError(500, err)
+						return
+					} else {
+						ctx.Data(200, mime.TypeByExtension(extension), data)
+						return
+					}
+				}
+			}
+
+			acceptHeader := ctx.Request.Header.Get("Accept")
+			if strings.Contains(acceptHeader, "text/html") || strings.Contains(acceptHeader, "*/*") {
+				file, err := staticFS.ReadFile(BuildUIAssetPath("/index.html"))
+				if err != nil {
+					_ = ctx.AbortWithError(500, err)
+					return
+				}
+				ctx.Data(200, "text/html", file)
+				return
+			}
+
+			return
+		}
+		ctx.AbortWithStatus(404)
 	})
 
 	r.POST("/api/messages", func(c *gin.Context) {
@@ -86,8 +133,8 @@ func Invoke() error {
 			return
 		}
 
-		c.JSON(200, gin.H{
-			"id": message.ID,
+		c.JSON(200, CreateMessageResponse{
+			ID: message.ID,
 		})
 	})
 
