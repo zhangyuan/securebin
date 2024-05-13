@@ -59,13 +59,15 @@ func BuildUIAssetPath(path string) string {
 	return fmt.Sprintf("dist%s", path)
 }
 
-func Invoke() error {
+func Invoke(addr string) error {
 	db, err := gorm.Open(sqlite.Open("data.db"), &gorm.Config{})
 	if err != nil {
 		return err
 	}
 
-	db.AutoMigrate(&Message{})
+	if err := db.AutoMigrate(&Message{}); err != nil {
+		return err
+	}
 
 	r := gin.Default()
 
@@ -194,6 +196,5 @@ func Invoke() error {
 		})
 	})
 
-	r.Run()
-	return nil
+	return r.Run(addr)
 }

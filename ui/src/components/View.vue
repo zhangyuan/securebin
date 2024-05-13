@@ -9,6 +9,7 @@ const route = useRoute()
 const id = route.params.id
 const key = route.params.key.toString()
 const content = ref("")
+const error = ref("")
 
 interface GetMessageResponse {
     content: string
@@ -23,18 +24,23 @@ onMounted(async () => {
 
     const decrypted = crypto.AES.decrypt(data.content, key)
 
+    if (decrypted.sigBytes < 0) {
+        error.value = "invalid key"
+    }
+
     content.value = decrypted.toString(crypto.enc.Utf8)
 })
 
 </script>
 
 <template>
-        <div class="container mx-auto py-4">
-            <h1 class="text-center mb-2"> Message: </h1>
+    <div class="container mx-auto py-4">
+        <div v-if="error" class="text-orange-600	my-5 text-center"> {{ error }}</div>
+        <div v-else>
             <div class="border-solid border-2 p-5"> {{ content }}</div>
-            <div class="text-center my-5"> Access count: {{ response?.acccess_count }}</div>
         </div>
-    
+        <div class="text-center my-5"> Access count: {{ response?.acccess_count }}</div>
+    </div>
 </template>
 
 <style scoped></style>

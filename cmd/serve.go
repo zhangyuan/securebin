@@ -11,7 +11,7 @@ var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Serve the API requests",
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := serve.Invoke(); err != nil {
+		if err := serve.Invoke(addr); err != nil {
 			log.Fatalln(err)
 		}
 	},
