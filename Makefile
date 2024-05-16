@@ -1,3 +1,5 @@
+export CGO_ENABLED = 1
+
 build:
 	go build -ldflags "-s -w"
 
