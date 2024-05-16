@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { httpClient } from '@/http/client';
 import * as crypto from 'crypto-js';
 import { useRouter } from 'vue-router'
@@ -8,6 +8,18 @@ import { useRouter } from 'vue-router'
 const content = ref("");
 const password = ref("");
 const maxAccessCount = ref<number>();
+    const messageURL = ref<string>();
+
+const reset = () => {
+    content.value = ""
+    password.value = ""
+    maxAccessCount.value = undefined
+    messageURL.value = ""
+}
+
+const isValid = computed(() => {
+  return !!content.value
+})
 
 interface CreateMessageResponse {
     id: number
@@ -34,7 +46,8 @@ const onCreate = async (event: Event) => {
 
     const { data } = await httpClient.post<CreateMessageResponse>("/api/messages", payload)
 
-    router.push({name: 'view', params: {id: data.id, key: key}})
+    const messagePath = router.resolve({name: 'view', params: {id: data.id, key: key}}).href
+    messageURL.value = new URL(messagePath, window.location.origin).href;
 }
 
 </script>
@@ -42,9 +55,18 @@ const onCreate = async (event: Event) => {
 <template>
     <div class="container mx-auto py-4">
         <h1 class="text-center mb-2">Create Encrypted Message</h1>
-        <form>
+        <div v-if="messageURL" class="text-center">
+            <h2 class="my-4"> Please copy the URL and send it to the receipant:</h2>
+            <input readonly class="text-center w-full my-1 border-solid border-2" id="message-url" v-model="messageURL" />
+
+            <div class="my-10">
+                <button @click="reset" class="border-solid border-2 bg-sky-400 text-white p-2 px-5"> Create More...</button>
+            </div>
+        </div>
+        <div v-else>
+            <form>
             <div class="my-2">
-                <textarea class="form-textarea w-full" placeholder="Content" v-model="content" />
+                <textarea rows="10" class="form-textarea w-full" placeholder="Content" v-model="content" />
             </div>
 
             <div class="my-2">
@@ -56,10 +78,12 @@ const onCreate = async (event: Event) => {
             </div>
 
             <div class="my-2 text-center">
-                <button class="border-solid border-2 border-indigo-600 p-2 px-5" @click="onCreate">Create</button>
+                <button :disabled="!isValid" class="border-solid border-2 disabled:bg-slate-400 bg-sky-400 text-white p-2 px-5" @click="onCreate">Create</button>
             </div>
-
         </form>
+
+        </div>
+
     </div>
 
 </template>

@@ -76,7 +76,7 @@ const onReveal = async (event: Event) => {
     <div class="container mx-auto py-4">
         <div v-if="errorMessage" class="text-orange-600 my-5 text-center"> {{ errorMessage }}</div>
         <div v-if="message">
-            <div class="border-solid border-2 p-5"> {{ content }}</div>
+            <pre class="form-textarea w-full" placeholder="Content">{{ content  }}</pre>
             <div class="text-center my-5"> Access count: {{ message.acccess_count }}</div>
         </div>
 
