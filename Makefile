@@ -13,7 +13,7 @@ build-linux:
 	GOOS=linux GOARCH=amd64 go build -o bin/securebin_linux-amd64 -ldflags "-s -w"
 
 build-windows:
-    GOOS=windows GOARCH=amd64 go build -o bin/securebin_windows-amd64 -ldflags "-s -w"
+	GOOS=windows GOARCH=amd64 go build -o bin/securebin_windows-amd64 -ldflags "-s -w"
 
 build-all: clean build-macos build-linux build-windows
 
