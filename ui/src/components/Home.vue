@@ -40,7 +40,7 @@ const onCreate = async (event: Event) => {
 
     const payload = {
         content: encrypted.toString(),
-        password: password.value.trim(),
+        password: password.value,
         max_access_count: maxAccessCount.value || 0,
     }
 
