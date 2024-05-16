@@ -22,7 +22,7 @@ type CreateMessageRequest struct {
 }
 
 type GetMessageRequest struct {
-	Password string
+	Password string `json:"password"`
 }
 
 type CreateMessageResponse struct {
@@ -138,6 +138,26 @@ func Invoke(addr string) error {
 		c.JSON(200, CreateMessageResponse{
 			ID: message.ID,
 		})
+	})
+
+	r.GET("/api/messages/:id", func(c *gin.Context) {
+		id := c.Param("id")
+
+		var message Message
+		if err := db.First(&message, id).Error; err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			return
+		}
+
+		passwordRequired := true
+		if message.EncryptedPassword == "" {
+			passwordRequired = false
+		}
+
+		c.JSON(200, gin.H{
+			"password_required": passwordRequired,
+		})
+
 	})
 
 	r.POST("/api/messages/:id", func(c *gin.Context) {

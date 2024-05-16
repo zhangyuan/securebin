@@ -41,14 +41,14 @@ const onCreate = async (event: Event) => {
 <template>
     <div class="container mx-auto py-4">
         <h1 class="text-center mb-2">Create Encrypted Message</h1>
-        <form >
+        <form>
             <div class="my-2">
                 <textarea class="form-textarea w-full" placeholder="Content" v-model="content" />
             </div>
 
-            <!-- <div class="my-2">
+            <div class="my-2">
                 <input type="password" class="form-input w-full" placeholder="Password (Optional)" v-model="password"  />
-            </div> -->
+            </div>
 
             <div class="my-2 text-center">
                 <button class="border-solid border-2 border-indigo-600 p-2 px-5" @click="onCreate">Create</button>
