@@ -10,8 +10,8 @@ import (
 	"securebin/ui"
 
 	"github.com/gin-gonic/gin"
+	"github.com/glebarez/sqlite"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
