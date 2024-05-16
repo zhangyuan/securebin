@@ -174,6 +174,16 @@ func Invoke(addr string) error {
 			return
 		}
 
+		if err := db.Model(&message).Update("access_count", gorm.Expr("access_count + ?", 1)).Error; err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err})
+			return
+		}
+
+		if err := db.First(&message, id).Error; err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			return
+		}
+
 		if (message.MaxAccessCount != 0) && (message.AccessCount >= message.MaxAccessCount) {
 			if err := db.Delete(&Message{}, message.ID).Error; err != nil {
 				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
@@ -181,11 +191,6 @@ func Invoke(addr string) error {
 			}
 
 			c.AbortWithStatusJSON(404, gin.H{"error": "NOT FOUND"})
-		}
-
-		if err := db.Model(&message).Update("access_count", gorm.Expr("access_count + ?", 1)).Error; err != nil {
-			c.AbortWithStatusJSON(500, gin.H{"error": err})
-			return
 		}
 
 		c.JSON(200, GetMessageResponse{
