@@ -7,6 +7,7 @@ import { useRouter } from 'vue-router'
 
 const content = ref("");
 const password = ref("");
+const maxAccessCount = ref<number>();
 
 interface CreateMessageResponse {
     id: number
@@ -27,9 +28,9 @@ const onCreate = async (event: Event) => {
 
     const payload = {
         content: encrypted.toString(),
-        password: password.value
+        password: password.value.trim(),
+        max_access_count: maxAccessCount.value || 0,
     }
-
 
     const { data } = await httpClient.post<CreateMessageResponse>("/api/messages", payload)
 
@@ -47,7 +48,11 @@ const onCreate = async (event: Event) => {
             </div>
 
             <div class="my-2">
-                <input type="password" class="form-input w-full" placeholder="Password (Optional)" v-model="password"  />
+                <input type="password" class="form-input w-full" placeholder="Password (optional)" v-model="password" />
+            </div>
+
+            <div class="my-2">
+                <input type="number" class="form-input w-full" placeholder="Max access count (optional)" v-model="maxAccessCount" />
             </div>
 
             <div class="my-2 text-center">

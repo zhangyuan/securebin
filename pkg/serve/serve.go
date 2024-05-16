@@ -1,6 +1,7 @@
 package serve
 
 import (
+	"errors"
 	"fmt"
 	"mime"
 	"strings"
@@ -145,6 +146,10 @@ func Invoke(addr string) error {
 
 		var message Message
 		if err := db.First(&message, id).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				c.AbortWithStatusJSON(400, gin.H{"error": err.Error()})
+				return
+			}
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 			return
 		}
@@ -171,7 +176,11 @@ func Invoke(addr string) error {
 
 		var message Message
 		if err := db.First(&message, id).Error; err != nil {
-			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				c.AbortWithStatusJSON(400, gin.H{"error": err.Error()})
+			} else {
+				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			}
 			return
 		}
 
@@ -199,24 +208,22 @@ func Invoke(addr string) error {
 			return
 		}
 
-		if err := db.First(&message, id).Error; err != nil {
-			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
-			return
-		}
-
-		if (message.MaxAccessCount != 0) && (message.AccessCount >= message.MaxAccessCount) {
+		if message.MaxAccessCount != 0 && message.AccessCount+1 >= message.MaxAccessCount {
 			if err := db.Delete(&Message{}, message.ID).Error; err != nil {
 				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 				return
 			}
 
-			c.AbortWithStatusJSON(404, gin.H{"error": "NOT FOUND"})
+			if message.AccessCount+1 > message.MaxAccessCount {
+				c.AbortWithStatusJSON(404, gin.H{"error": "NOT FOUND"})
+				return
+			}
 		}
 
 		c.JSON(200, GetMessageResponse{
 			Content:        message.Content,
 			ExpireAt:       message.ExpireAt,
-			AccessCount:    message.AccessCount,
+			AccessCount:    message.AccessCount + 1,
 			MaxAccessCount: message.MaxAccessCount,
 		})
 	})
