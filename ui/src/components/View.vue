@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router'
 import * as crypto from 'crypto-js';
 import { httpClient } from '@/http/client';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 
 interface GetMessageResponse {
     password_required: boolean
@@ -26,10 +26,21 @@ const metadata = ref<GetMessageResponse>()
 const password = ref<string>()
 
 const revealMesssage = async (password?: string) => {
-    const { data: messageData } = await httpClient.post<ViewMessageResponse>(`/api/messages/${id}`, {
-        password: password
-    })
-    message.value = messageData
+    errorMessage.value = ""
+    try {
+        const { data: messageData } = await httpClient.post<ViewMessageResponse>(`/api/messages/${id}`, {
+            password: password
+        })
+        message.value = messageData
+
+    } catch (err: any) {
+        if (axios.isAxiosError(err)) {
+            errorMessage.value = err.response?.data.error
+        } else {
+            errorMessage.value = err
+        }
+        return
+    }
 
     const decrypted = crypto.AES.decrypt(message.value.content, key)
 
@@ -58,7 +69,6 @@ onMounted(async () => {
 })
 
 
-
 const onReveal = async (event: Event) => {
     event.preventDefault()
 
@@ -76,7 +86,7 @@ const onReveal = async (event: Event) => {
     <div class="container mx-auto py-4">
         <div v-if="errorMessage" class="text-orange-600 my-5 text-center"> {{ errorMessage }}</div>
         <div v-if="message">
-            <pre class="form-textarea w-full" placeholder="Content">{{ content  }}</pre>
+            <pre class="form-textarea w-full" placeholder="Content">{{ content }}</pre>
             <div class="text-center my-5"> Access count: {{ message.acccess_count }}</div>
         </div>
 

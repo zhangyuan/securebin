@@ -56,11 +56,11 @@ const onCreate = async (event: Event) => {
     <div class="container mx-auto py-4">
         <h1 class="text-center mb-2">Create Encrypted Message</h1>
         <div v-if="messageURL" class="text-center">
-            <h2 class="my-4"> Please copy the URL and send it to the receipant:</h2>
+            <h2 class="my-4"> Please copy the URL and send it to the recipient:</h2>
             <input readonly class="text-center w-full my-1 border-solid border-2" id="message-url" v-model="messageURL" />
 
             <div class="my-10">
-                <button @click="reset" class="border-solid border-2 bg-sky-400 text-white p-2 px-5"> Create More...</button>
+                <button @click="reset" class="border-solid border-2 bg-sky-400 text-white p-2 px-5"> Create more</button>
             </div>
         </div>
         <div v-else>
@@ -70,7 +70,7 @@ const onCreate = async (event: Event) => {
             </div>
 
             <div class="my-2">
-                <input type="password" class="form-input w-full" placeholder="Password (optional)" v-model="password" />
+                <input type="password" class="form-input w-full" readonly onfocus="this.removeAttribute('readonly');" placeholder="Password (optional)" v-model="password" />
             </div>
 
             <div class="my-2">
