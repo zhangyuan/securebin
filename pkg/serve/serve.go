@@ -38,10 +38,12 @@ type GetMessageResponse struct {
 }
 
 type Message struct {
-	ExpireAt time.Time
-	gorm.Model
+	ExpireAt          time.Time
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
 	EncryptedPassword string
 	Content           string
+	ID                uint `gorm:"primarykey"`
 	MaxAccessCount    int64
 	AccessCount       int64
 }
@@ -60,8 +62,8 @@ func BuildUIAssetPath(path string) string {
 	return fmt.Sprintf("dist%s", path)
 }
 
-func Invoke(addr string) error {
-	db, err := gorm.Open(sqlite.Open("data.db"), &gorm.Config{})
+func Invoke(addr string, dbPath string) error {
+	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
 	if err != nil {
 		return err
 	}
@@ -187,7 +189,7 @@ func Invoke(addr string) error {
 		if message.EncryptedPassword != "" {
 			if !CheckPasswordHash(request.Password, message.EncryptedPassword) {
 				c.AbortWithStatusJSON(400, gin.H{
-					"error": "invalid password",
+					"error": "Invalid password",
 				})
 				return
 			}
