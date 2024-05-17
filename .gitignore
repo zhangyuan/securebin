@@ -3,3 +3,4 @@
 data.db
 /bin/securebin*
 .DS_Store
+/tmp
