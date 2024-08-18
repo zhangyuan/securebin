@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router'
-import * as crypto from 'crypto-js';
+import { useRoute } from 'vue-router';
+import * as crypto from '@/crypto/crypto';
 import { httpClient } from '@/http/client';
 import axios from 'axios';
 
@@ -17,7 +17,8 @@ interface ViewMessageResponse {
 const route = useRoute()
 
 const id = route.params.id
-const key = route.params.key.toString()
+const keyHex = route.params.key.toString()
+const ivHex = route.params.iv.toString()
 const content = ref("")
 const errorMessage = ref("")
 
@@ -42,13 +43,17 @@ const revealMesssage = async (password?: string) => {
         return
     }
 
-    const decrypted = crypto.AES.decrypt(message.value.content, key)
+    const encypted = message.value.content
 
-    if (decrypted.sigBytes < 0) {
+    let plaintext = ""
+    try {
+        plaintext = await crypto.decrypt(encypted, keyHex, ivHex)
+        console.log("plaintext", plaintext)
+    } catch (e) {
         errorMessage.value = "invalid key"
     }
-
-    content.value = decrypted.toString(crypto.enc.Utf8)
+    
+    content.value = plaintext
 }
 
 onMounted(async () => {

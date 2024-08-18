@@ -8,7 +8,7 @@ import View from "@/components/View.vue";
 
 const routes = [
   { path: "/", component: Home, name: "home" },
-  { path: "/messages/:id/:key", component: View, name: "view" },
+  { path: "/messages/:id/:key/:iv", component: View, name: "view" },
 ];
 
 const router = createRouter({

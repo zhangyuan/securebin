@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { httpClient } from '@/http/client';
-import * as crypto from 'crypto-js';
 import { useRouter } from 'vue-router'
-
+import * as crypto from '@/crypto/crypto'
 
 const content = ref("");
 const password = ref("");
@@ -34,19 +33,20 @@ const onCreate = async (event: Event) => {
         return
     }
 
-    const key = crypto.lib.WordArray.random(32).toString()
+    const keyHex = crypto.secureRandomString(32)
+    const ivHex = crypto.secureRandomString(16)
 
-    const encrypted = crypto.AES.encrypt(content.value, key);
+    const encrypted = await crypto.encrypt(content.value, keyHex, ivHex)
 
     const payload = {
-        content: encrypted.toString(),
+        content: encrypted,
         password: password.value,
         max_access_count: maxAccessCount.value || 0,
     }
 
     const { data } = await httpClient.post<CreateMessageResponse>("/api/messages", payload)
 
-    const messagePath = router.resolve({name: 'view', params: {id: data.id, key: key}}).href
+    const messagePath = router.resolve({name: 'view', params: {id: data.id, key: keyHex, iv: ivHex}}).href
     messageURL.value = new URL(messagePath, window.location.origin).href;
 }
 
