@@ -1,8 +1,10 @@
 # SecureBin
 
-A simple application for sharing text securely with client side encryption.
+A simple application for sharing text securely with client side encryption. Currently it encrypt the message with AES-GCM.
 
-> As the application packages crypoto code (frontend typescript modules) into the binary, the Anti-virus software may prevent you from downloading or using it. If so, you can pull the source code and build it on you own. 
+## How it works
+
+![How securebin works](./docs/how-securebin-works.png "How securebin works")
 
 ## Usage
 
