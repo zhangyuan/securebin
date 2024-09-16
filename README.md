@@ -13,7 +13,7 @@ Download the binary from [Releases](https://github.com/zhangyuan/securebin/relea
 Start the server:
 
 ```bash
-securebin server -l :8080
+securebin serve -l :8080
 ```
 
 Open <http://localhost:8080> in the browser.
